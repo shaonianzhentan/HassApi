@@ -22,7 +22,7 @@ public class HassAuth
     /// </summary>
     public HassAuth(string baseUrl)
     {
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl.TrimEnd('/');
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class HassAuth
         // 1. 使用静态的 _httpClient
         using var httpContent = new StringContent(queryString, Encoding.UTF8, "application/x-www-form-urlencoded");
         
-        string fullUrl = $"{baseUrl.TrimEnd('/')}/auth/token";
+        string fullUrl = $"{baseUrl}/auth/token";
         
         // 2. 使用静态客户端发送请求
         HttpResponseMessage response = await _httpClient.PostAsync(fullUrl, httpContent);
