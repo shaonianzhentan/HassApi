@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D62AB09D-79B0-431E-A3F7-EBCBA5BFC013}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HassApi", "src\HassApi\HassApi.csproj", "{35C198D0-7340-4D3F-93EB-67CA9AD9CC92}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{FF34B580-0113-40C4-8D7A-16D08F5FBE9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HassApi.Tests", "tests\HassApi.Tests\HassApi.Tests.csproj", "{FF6ECF44-A1F0-46F0-83ED-502D8212B0D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{35C198D0-7340-4D3F-93EB-67CA9AD9CC92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35C198D0-7340-4D3F-93EB-67CA9AD9CC92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35C198D0-7340-4D3F-93EB-67CA9AD9CC92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35C198D0-7340-4D3F-93EB-67CA9AD9CC92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF6ECF44-A1F0-46F0-83ED-502D8212B0D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF6ECF44-A1F0-46F0-83ED-502D8212B0D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF6ECF44-A1F0-46F0-83ED-502D8212B0D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF6ECF44-A1F0-46F0-83ED-502D8212B0D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{35C198D0-7340-4D3F-93EB-67CA9AD9CC92} = {D62AB09D-79B0-431E-A3F7-EBCBA5BFC013}
+		{FF6ECF44-A1F0-46F0-83ED-502D8212B0D5} = {FF34B580-0113-40C4-8D7A-16D08F5FBE9A}
+	EndGlobalSection
+EndGlobal

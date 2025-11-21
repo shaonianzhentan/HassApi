@@ -1,0 +1,29 @@
+name: Publish to NuGet
+
+on:
+  release:
+    types: [published] # 当在 GitHub 页面点击 "发布 Release" 时触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x # 使用最新的 SDK 来编译
+
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Pack
+      # 这里的 Version 变量会自动取你在 Release tag 里写的版本号 (例如 1.0.0)
+      run: dotnet pack src/HassApi/HassApi.csproj --configuration Release --no-build --output . /p:Version=${{ github.event.release.tag_name }}
+
+    - name: Push to NuGet
+      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
