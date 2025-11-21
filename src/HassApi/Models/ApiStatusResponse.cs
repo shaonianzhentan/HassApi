@@ -1,13 +1,14 @@
 namespace HassApi.Models;
 
 /// <summary>
-/// 对应于 GET /api/ 端点的响应结构。
+/// Home Assistant API 状态响应模型。
+/// 对应 GET /api/ 端点的响应：{"message": "API running."}
 /// </summary>
-// 使用 record 保持不可变性
 public record ApiStatusResponse
 {
     /// <summary>
-    /// Message
+    /// API 状态信息。
+    /// 对应 JSON 中的 "message" 字段。
     /// </summary>
     public required string Message { get; init; }
 }

@@ -22,15 +22,14 @@ public record HassState
     /// 最后一次状态变化时间 (对应 JSON 中的 last_changed)
     /// </summary>
     public DateTimeOffset LastChanged { get; init; }
+
+    /// <summary>
+    /// 最后一次状态变化时间 (对应 JSON 中的 last_updated)
+    /// </summary>
+    public DateTimeOffset? LastUpdated { get; init; }
     
     /// <summary>
     /// 属性字典 (对应 JSON 中的 attributes)
     /// </summary>
     public Dictionary<string, object> Attributes { get; init; } = new();
-
-    /// <summary>
-    /// 最后一次更新时间 (如果需要的话)
-    /// </summary>
-    // 注意：这个属性名假设 JSON 中对应的是 "last_updated"
-    public DateTimeOffset LastUpdated { get; init; }
 }
