@@ -16,12 +16,11 @@ namespace HassApi;
 public class MobileApp
 {
     // 专用于未认证 Webhook 的 HttpClient 实例。
-    private readonly HttpClient _httpClient = new HttpClient(); 
-    
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly HttpClient _httpClient = HassDefaults.UnauthenticatedClient;
+    private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
     private readonly string _initialBaseUrl;
     private readonly string _webhookId;
-    
+
     // 私有属性：用于构造 Webhook 完整 URL
     private string WebhookUrl => $"{_initialBaseUrl.TrimEnd('/')}/api/webhook/{_webhookId}";
 
@@ -31,22 +30,16 @@ public class MobileApp
     /// </summary>
     /// <param name="initialBaseUrl">Home Assistant 的基础 URL。</param>
     /// <param name="webhookId">设备注册成功后持久化存储的 Webhook ID。</param>
-    /// <param name="jsonOptions">与 HassClient 相同的 JSON 序列化选项。</param>
-    internal MobileApp(
-        string initialBaseUrl, 
-        string webhookId,
-        JsonSerializerOptions jsonOptions)
+    public MobileApp(string initialBaseUrl, string webhookId)
     {
         // --- 兼容旧框架的参数检查 ---
         if (string.IsNullOrWhiteSpace(initialBaseUrl)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(initialBaseUrl));
         if (string.IsNullOrWhiteSpace(webhookId)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(webhookId));
-        if (jsonOptions is null) throw new ArgumentNullException(nameof(jsonOptions));
 
         _initialBaseUrl = initialBaseUrl;
         _webhookId = webhookId;
-        _jsonOptions = jsonOptions;
     }
-    
+
     // --- 低层级通用发送方法 ---
 
     /// <summary>
@@ -72,7 +65,7 @@ public class MobileApp
     {
         var jsonContent = JsonSerializer.Serialize(payload, _jsonOptions);
         using var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        
+
         HttpResponseMessage response;
         try
         {
@@ -80,7 +73,7 @@ public class MobileApp
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            throw; 
+            throw;
         }
         catch (Exception ex)
         {
@@ -101,7 +94,7 @@ public class MobileApp
         var responseStream = await response.Content.ReadAsStreamAsync();
         return await JsonSerializer.DeserializeAsync<TResponse>(responseStream, _jsonOptions, cancellationToken);
     }
-    
+
     // --- 高层级 API (发送/void) ---
 
     /// <summary>
@@ -113,7 +106,7 @@ public class MobileApp
     {
         // --- 兼容旧框架的参数检查 ---
         if (locationData is null) throw new ArgumentNullException(nameof(locationData));
-        
+
         var locationPayload = new WebhookRequest<LocationUpdateData>("update_location", locationData);
         return SendWebhookDataAsync(locationPayload, cancellationToken);
     }
@@ -127,7 +120,7 @@ public class MobileApp
     {
         // --- 兼容旧框架的参数检查 ---
         if (serviceData is null) throw new ArgumentNullException(nameof(serviceData));
-        
+
         var servicePayload = new WebhookRequest<CallServiceData>("call_service", serviceData);
         return SendWebhookDataAsync(servicePayload, cancellationToken);
     }
@@ -161,7 +154,7 @@ public class MobileApp
     }
 
     // --- 高层级 API (获取/带响应) ---
-    
+
     /// <summary>
     /// 通过 Webhook 渲染一个或多个 Home Assistant 模板。
     /// </summary>
@@ -200,5 +193,48 @@ public class MobileApp
     {
         var request = new WebhookBaseRequest("get_config");
         return PostJsonUnauthenticatedWithResponseAsync<object>(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// 通过 Webhook 注册一个新的传感器或二进制传感器。
+    /// 注意：一次只能注册一个传感器。
+    /// </summary>
+    /// <param name="sensorData">包含传感器配置和初始状态的实体负载。</param>
+    /// <param name="cancellationToken">用于取消长时间运行的操作的令牌。</param>
+    public Task RegisterSensorAsync(
+        RegisterSensorData sensorData,
+        CancellationToken cancellationToken = default)
+    {
+        // --- 兼容旧框架的参数检查 ---
+        if (sensorData is null) throw new ArgumentNullException(nameof(sensorData));
+
+        // 1. 构造完整的 Webhook 请求实体：使用泛型基类，手动传入 type: "register_sensor"
+        var registerPayload = new WebhookRequest<RegisterSensorData>("register_sensor", sensorData);
+
+        // 2. 调用低级别的通用发送方法
+        return SendWebhookDataAsync(registerPayload, cancellationToken);
+    }
+
+    /// <summary>
+    /// 通过 Webhook 批量更新一个或多个已注册传感器的状态和属性。
+    /// </summary>
+    /// <param name="updates">包含要更新的传感器数据的列表。</param>
+    /// <param name="cancellationToken">用于取消长时间运行的操作的令牌。</param>
+    /// <returns>返回一个字典，其中键是 unique_id，值是更新结果。</returns>
+    public Task<Dictionary<string, UpdateSensorResult>?> UpdateSensorsAsync(
+        List<UpdateSensorData> updates,
+        CancellationToken cancellationToken = default)
+    {
+        if (updates is null || updates.Count == 0)
+        {
+            throw new ArgumentException("Updates list cannot be null or empty.", nameof(updates));
+        }
+
+        // 1. 构造完整的 Webhook 请求实体：data 就是 updates 列表本身
+        // WebhookRequest<TData> 接收 TData，这里 TData 是 List<UpdateSensorData>
+        var updatePayload = new WebhookRequest<List<UpdateSensorData>>("update_sensor_states", updates);
+
+        // 2. 调用带响应的底层方法，并指定返回类型
+        return PostJsonUnauthenticatedWithResponseAsync<Dictionary<string, UpdateSensorResult>>(updatePayload, cancellationToken);
     }
 }

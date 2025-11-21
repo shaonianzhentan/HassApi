@@ -19,7 +19,7 @@ public class HassClient
 {
     private readonly string _initialBaseUrl;
     private readonly HttpClient _httpClient;
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
 
     /// <summary>
     /// 初始化 HassClient
@@ -43,38 +43,7 @@ public class HassClient
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        // 配置 JSON 序列化选项 (处理 HA 的 snake_case)
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-            WriteIndented = false,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            // 确保我们能正确处理 HistoryState 中的稀疏对象
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip
-        };
     }
-
-
-    #region 移动应用
-
-    /// <summary>
-/// 使用持久化存储的 Webhook ID 创建 MobileApp 实例，用于后续交互。
-/// 此方法内部处理配置 (baseUrl, JsonOptions) 的传递。
-/// </summary>
-/// <param name="webhookId">持久化存储的 Webhook ID。</param>
-/// <returns>配置完成的 MobileApp 实例。</returns>
-public MobileApp CreateMobileApp(string webhookId)
-{
-    return new MobileApp(
-        _initialBaseUrl, 
-        webhookId, 
-        _jsonOptions
-    );
-}
-
-    #endregion
-
 
     // --- 核心状态 API ---
 
