@@ -28,7 +28,7 @@ public record HassConfig
     public required string TimeZone { get; init; }
 
     // 单位系统 (unit_system)，使用嵌套模型
-    public required UnitSystem UnitSystem { get; init; } = new();
+    public required UnitSystem UnitSystem { get; init; }
 
     // 核心版本号 (version)
     public required string Version { get; init; }

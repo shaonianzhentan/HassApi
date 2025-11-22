@@ -56,7 +56,7 @@ public record MobileAppRegistrationRequest
     /// <summary>
     /// 应用是否支持加密 (supports_encryption)。必填。
     /// </summary>
-    public required bool SupportsEncryption { get; init; };
+    public required bool SupportsEncryption { get; init; }
 
     /// <summary>
     /// 应用扩展数据 (app_data)。包含如推送通知密钥等自定义数据。
