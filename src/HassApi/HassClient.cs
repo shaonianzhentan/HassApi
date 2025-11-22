@@ -18,22 +18,19 @@ namespace HassApi;
 public class HassClient
 {
     private readonly string _initialBaseUrl;
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = new HttpClient();
     private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
 
     /// <summary>
     /// 初始化 HassClient
     /// </summary>
-    /// <param name="httpClient">推荐通过 IHttpClientFactory 注入实例</param>
     /// <param name="baseUrl">HA 地址 (例如: http://192.168.1.5:8123)</param>
     /// <param name="accessToken">长期访问令牌 (Long-Lived Access Token)</param>
-    public HassClient(HttpClient httpClient, string baseUrl, string accessToken)
+    public HassClient(string baseUrl, string accessToken)
     {
         // 基础校验
         if (string.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentNullException(nameof(baseUrl));
         if (string.IsNullOrWhiteSpace(accessToken)) throw new ArgumentNullException(nameof(accessToken));
-
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
         // 配置 BaseAddress
         _initialBaseUrl = baseUrl.TrimEnd('/') + "/";

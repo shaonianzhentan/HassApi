@@ -9,7 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageId>HassApi</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.4</Version>
     <Authors>shaonianzhentan</Authors>
     <Company>shaonianzhentan</Company>
     <Description>A comprehensive .NET Standard 2.0 library for Home Assistant REST API.</Description>

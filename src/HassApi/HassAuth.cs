@@ -1,8 +1,9 @@
+using HassApi.Models; 
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HassApi.Models; 
+using System.Web;
 
 namespace HassApi;
 
@@ -15,14 +16,27 @@ public class HassAuth
     private static readonly HttpClient _httpClient = HassDefaults.UnauthenticatedClient;
     private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
 
-    private readonly string baseUrl;
+    readonly string baseUrl;
+    readonly string clientId;
+    public readonly string redirectUri;
 
     /// <summary>
     /// 初始化 HassAuth。
     /// </summary>
-    public HassAuth(string baseUrl)
+    public HassAuth(string baseUrl, string clientId)
     {
         this.baseUrl = baseUrl.TrimEnd('/');
+        this.clientId = HttpUtility.UrlEncode(clientId);
+        redirectUri = $"{baseUrl}/?external_auth=1";
+    }
+
+    /// <summary>
+    /// 获取授权链接
+    /// </summary>
+    /// <returns></returns>
+    public string GetAuthUrl()
+    {
+        return $"{baseUrl}/auth/authorize?client_id={clientId}&redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
     }
 
     /// <summary>
@@ -50,7 +64,7 @@ public class HassAuth
     /// <summary>
     /// 使用授权码 (Code) 交换访问令牌 (Access Token) 和刷新令牌 (Refresh Token)。
     /// </summary>
-    public Task<AuthorizationResult?> GetAccessTokenAsync(string code, string hassUrl, string clientId)
+    public Task<AuthorizationResult?> GetAccessTokenAsync(string code)
     {
         string queryString = $"grant_type=authorization_code&code={code}&client_id={clientId}";
         return PostAuthTokenAsync(queryString);
@@ -59,7 +73,7 @@ public class HassAuth
     /// <summary>
     /// 使用刷新令牌 (Refresh Token) 获取新的访问令牌 (Access Token)。
     /// </summary>
-    public Task<AuthorizationResult?> GetRefreshTokenAsync(string hassUrl, string refreshToken, string clientId)
+    public Task<AuthorizationResult?> GetRefreshTokenAsync(string refreshToken)
     {
         string queryString = $"grant_type=refresh_token&refresh_token={refreshToken}&client_id={clientId}";
         return PostAuthTokenAsync(queryString);
@@ -68,7 +82,7 @@ public class HassAuth
     /// <summary>
     /// 撤销指定的刷新令牌 (Refresh Token)。
     /// </summary>
-    public async Task RevokeRefreshTokenAsync(string hassUrl, string refreshToken)
+    public async Task RevokeRefreshTokenAsync(string refreshToken)
     {
         string queryString = $"token={refreshToken}&action=revoke";
         await PostAuthTokenAsync(queryString); 
