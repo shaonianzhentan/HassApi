@@ -66,7 +66,7 @@ public class HassAuth: HttpClientBase
     /// <summary>
     /// 使用授权码 (Code) 交换访问令牌 (Access Token) 和刷新令牌 (Refresh Token)。
     /// </summary>
-    public Task<AuthorizationResult?> GetAccessTokenAsync(string code)
+    public Task<AuthorizationResult?> GetRefreshTokenAsync(string code)
     {
         string queryString = $"grant_type=authorization_code&code={code}&client_id={clientId}";
         return PostAuthTokenAsync(queryString);
@@ -75,7 +75,7 @@ public class HassAuth: HttpClientBase
     /// <summary>
     /// 使用刷新令牌 (Refresh Token) 获取新的访问令牌 (Access Token)。
     /// </summary>
-    public Task<AuthorizationResult?> GetRefreshTokenAsync(string refreshToken)
+    public Task<AuthorizationResult?> GetAccessTokenAsync(string refreshToken)
     {
         string queryString = $"grant_type=refresh_token&refresh_token={refreshToken}&client_id={clientId}";
         return PostAuthTokenAsync(queryString);

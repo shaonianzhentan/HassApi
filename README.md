@@ -2,7 +2,8 @@
 Home Assistant REST API
 
 
-```csharp
+**授权**
+```cs
 using HassApi;
 
 var hassAuth = new HassAuth(
@@ -42,19 +43,42 @@ Console.WriteLine($"ExpiresIn: {auth.ExpiresIn}");
 Console.WriteLine($"TokenType: {auth.TokenType}");
 ```
 
+**REST API**
 ```cs
 using HassApi;
 
 // 1. 初始化客户端
-var client = new HassClient(
+var hassClient = new HassClient(
     "http://192.168.1.5:8123", 
     "eyJhGci..." // 你的 Long-Lived Token
 );
 
 // 2. 获取某个灯的状态
-var light = await client.GetStateAsync("light.living_room");
+var light = await hassClient.GetStateAsync("light.living_room");
 Console.WriteLine($"客厅灯状态: {light?.State}");
 
 // 3. 开灯 (调用服务)
-await client.CallServiceAsync("light", "turn_on", new { entity_id = "light.living_room", brightness = 255 });
+await hassClient.CallServiceAsync("light", "turn_on", new { entity_id = "light.living_room", brightness = 255 });
+```
+
+**MobileApp**
+```cs
+// 1. 注册设备
+var res = await hassClient.RegisterMobileAppAsync(new MobileAppRegistrationRequest{
+    ...
+})
+Console.WriteLine($"WebhookId: {res.WebhookId}");
+
+var mobileApp = new MobileApp(
+    "http://192.168.1.5:8123",
+    "xxxxxxxxxxxxx" // WebhookId
+);
+
+// 2. 更新设备信息
+await mobileApp.UpdateRegistrationAsync(new UpdateRegistrationRequest{
+    ...
+})
+
+// 3. 上报传感器
+...
 ```
