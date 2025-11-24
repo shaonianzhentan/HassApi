@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web; // 引入 System.Web 用于 URL 编码
@@ -19,7 +17,6 @@ public class HassClient
 {
     private readonly string _initialBaseUrl;
     private readonly HttpClient _httpClient = new HttpClient();
-    private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
 
     /// <summary>
     /// 初始化 HassClient
@@ -336,7 +333,7 @@ public class HassClient
         }
 
         using var stream = await response.Content.ReadAsStreamAsync();
-        return await JsonSerializer.DeserializeAsync<T>(stream, _jsonOptions, cancellationToken);
+        return await HassJsonHelper.DeserializeAsync<T>(stream, cancellationToken);
     }
 
     /// <summary>
@@ -345,7 +342,7 @@ public class HassClient
     private async Task<T?> PostJsonAsync<T>(string endpoint, object? payload, CancellationToken cancellationToken)
     {
         var jsonContent = payload is not null
-            ? JsonSerializer.Serialize(payload, _jsonOptions)
+            ? HassJsonHelper.Serialize(payload)
             : "{}"; // 如果 payload 为 null，发送空 JSON 对象
 
         using var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -365,7 +362,7 @@ public class HassClient
         }
 
         using var responseStream = await response.Content.ReadAsStreamAsync();
-        return await JsonSerializer.DeserializeAsync<T>(responseStream, _jsonOptions, cancellationToken);
+        return await HassJsonHelper.DeserializeAsync<T>(responseStream, cancellationToken);
     }
 
     /// <summary>
@@ -375,7 +372,7 @@ public class HassClient
     private async Task<string> PostRawAsync(string endpoint, object? payload, CancellationToken cancellationToken)
     {
         var jsonContent = payload is not null
-            ? JsonSerializer.Serialize(payload, _jsonOptions)
+            ? HassJsonHelper.Serialize(payload)
             : "{}";
 
         using var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");

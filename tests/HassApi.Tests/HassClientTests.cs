@@ -17,8 +17,7 @@ public class HassClientTests
     // 辅助方法：创建一个带 Mock HttpHandler 的 HassClient 实例
     private HassClient CreateMockClient(MockHttpMessageHandler handler)
     {
-        var mockHttpClient = new HttpClient(handler) { BaseAddress = new Uri(FakeBaseUrl) };
-        return new HassClient(mockHttpClient, FakeBaseUrl, FakeToken);
+        return new HassClient(FakeBaseUrl, FakeToken);
     }
 
     /// <summary>

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using HassApi.Models.MobileApp;
@@ -17,7 +16,6 @@ public class MobileApp
 {
     // 专用于未认证 Webhook 的 HttpClient 实例。
     private readonly HttpClient _httpClient = HassDefaults.UnauthenticatedClient;
-    private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
     private readonly string _initialBaseUrl;
     private readonly string _webhookId;
 
@@ -63,7 +61,7 @@ public class MobileApp
         bool expectResponse = true)
         where TResponse : class
     {
-        var jsonContent = JsonSerializer.Serialize(payload, _jsonOptions);
+        var jsonContent = HassJsonHelper.Serialize(payload);
         using var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         HttpResponseMessage response;
@@ -92,7 +90,7 @@ public class MobileApp
         }
 
         var responseStream = await response.Content.ReadAsStreamAsync();
-        return await JsonSerializer.DeserializeAsync<TResponse>(responseStream, _jsonOptions, cancellationToken);
+        return await HassJsonHelper.DeserializeAsync<TResponse>(responseStream, cancellationToken);
     }
 
     // --- 高层级 API (发送/void) ---

@@ -14,7 +14,6 @@ public class HassAuth
 {
     // 关键修改 1: 使用 static readonly 确保在整个应用程序中只创建一个 HttpClient 实例。
     private static readonly HttpClient _httpClient = HassDefaults.UnauthenticatedClient;
-    private readonly JsonSerializerOptions _jsonOptions = HassDefaults.DefaultJsonOptions;
 
     readonly string baseUrl;
     readonly string clientId;
@@ -56,7 +55,7 @@ public class HassAuth
 
         string responseContent = await response.Content.ReadAsStringAsync();
         
-        return JsonSerializer.Deserialize<AuthorizationResult>(responseContent, _jsonOptions);
+        return HassJsonHelper.Deserialize<AuthorizationResult>(responseContent);
     }
     
     // --- 公共授权接口 (保持不变) ---
