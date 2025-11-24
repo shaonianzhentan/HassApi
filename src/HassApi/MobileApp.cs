@@ -99,13 +99,13 @@ public class MobileApp
     /// 发送设备的位置更新信息。
     /// </summary>
     public Task SendLocationUpdateAsync(
-        LocationUpdateData locationData,
+        LocationUpdateRequest locationData,
         CancellationToken cancellationToken = default)
     {
         // --- 兼容旧框架的参数检查 ---
         if (locationData is null) throw new ArgumentNullException(nameof(locationData));
 
-        var locationPayload = new WebhookRequest<LocationUpdateData>("update_location", locationData);
+        var locationPayload = new WebhookRequest<LocationUpdateRequest>("update_location", locationData);
         return SendWebhookDataAsync(locationPayload, cancellationToken);
     }
 
@@ -113,13 +113,13 @@ public class MobileApp
     /// 通过 Webhook 调用 Home Assistant 中的一个服务操作。
     /// </summary>
     public Task CallServiceActionAsync(
-        CallServiceData serviceData,
+        CallServiceRequest serviceData,
         CancellationToken cancellationToken = default)
     {
         // --- 兼容旧框架的参数检查 ---
         if (serviceData is null) throw new ArgumentNullException(nameof(serviceData));
 
-        var servicePayload = new WebhookRequest<CallServiceData>("call_service", serviceData);
+        var servicePayload = new WebhookRequest<CallServiceRequest>("call_service", serviceData);
         return SendWebhookDataAsync(servicePayload, cancellationToken);
     }
 
@@ -127,13 +127,13 @@ public class MobileApp
     /// 通过 Webhook 触发 Home Assistant 中的一个事件。
     /// </summary>
     public Task FireEventAsync(
-        FireEventData eventData,
+        FireEventRequest eventData,
         CancellationToken cancellationToken = default)
     {
         // --- 兼容旧框架的参数检查 ---
         if (eventData is null) throw new ArgumentNullException(nameof(eventData));
 
-        var eventPayload = new WebhookRequest<FireEventData>("fire_event", eventData);
+        var eventPayload = new WebhookRequest<FireEventRequest>("fire_event", eventData);
         return SendWebhookDataAsync(eventPayload, cancellationToken);
     }
 
@@ -200,14 +200,14 @@ public class MobileApp
     /// <param name="sensorData">包含传感器配置和初始状态的实体负载。</param>
     /// <param name="cancellationToken">用于取消长时间运行的操作的令牌。</param>
     public Task RegisterSensorAsync(
-        RegisterSensorData sensorData,
+        RegisterSensorRequest sensorData,
         CancellationToken cancellationToken = default)
     {
         // --- 兼容旧框架的参数检查 ---
         if (sensorData is null) throw new ArgumentNullException(nameof(sensorData));
 
         // 1. 构造完整的 Webhook 请求实体：使用泛型基类，手动传入 type: "register_sensor"
-        var registerPayload = new WebhookRequest<RegisterSensorData>("register_sensor", sensorData);
+        var registerPayload = new WebhookRequest<RegisterSensorRequest>("register_sensor", sensorData);
 
         // 2. 调用低级别的通用发送方法
         return SendWebhookDataAsync(registerPayload, cancellationToken);
@@ -220,7 +220,7 @@ public class MobileApp
     /// <param name="cancellationToken">用于取消长时间运行的操作的令牌。</param>
     /// <returns>返回一个字典，其中键是 unique_id，值是更新结果。</returns>
     public Task<Dictionary<string, UpdateSensorResult>?> UpdateSensorsAsync(
-        List<UpdateSensorData> updates,
+        List<UpdateSensorRequest> updates,
         CancellationToken cancellationToken = default)
     {
         if (updates is null || updates.Count == 0)
@@ -229,8 +229,8 @@ public class MobileApp
         }
 
         // 1. 构造完整的 Webhook 请求实体：data 就是 updates 列表本身
-        // WebhookRequest<TData> 接收 TData，这里 TData 是 List<UpdateSensorData>
-        var updatePayload = new WebhookRequest<List<UpdateSensorData>>("update_sensor_states", updates);
+        // WebhookRequest<TData> 接收 TData，这里 TData 是 List<UpdateSensorRequest>
+        var updatePayload = new WebhookRequest<List<UpdateSensorRequest>>("update_sensor_states", updates);
 
         // 2. 调用带响应的底层方法，并指定返回类型
         return PostJsonUnauthenticatedWithResponseAsync<Dictionary<string, UpdateSensorResult>>(updatePayload, cancellationToken);

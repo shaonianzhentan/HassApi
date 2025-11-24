@@ -5,7 +5,7 @@ namespace HassApi.Models;
 /// <summary>
 /// Webhook 消息的 'update_location' 类型中嵌套的 'data' 负载。
 /// </summary>
-public record LocationUpdateData(
+public record LocationUpdateRequest(
     // 必填字段
     List<double> Gps,               // 当前位置的经纬度数组 [latitude, longitude]
     int GpsAccuracy,                // GPS 精度，单位：米

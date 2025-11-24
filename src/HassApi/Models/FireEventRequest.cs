@@ -6,7 +6,7 @@ namespace HassApi.Models;
 /// Webhook 消息的 'fire_event' 类型中嵌套的 'data' 负载。
 /// 包含要触发的事件类型和事件数据。
 /// </summary>
-public record FireEventData(
+public record FireEventRequest(
     string EventType // 要触发的事件类型 (如 my_custom_event)
 )
 {

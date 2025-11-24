@@ -7,7 +7,7 @@ namespace HassApi.Models;
 /// Webhook 消息中 'register_sensor' 的顶级 'data' 负载。
 /// 包含注册新传感器所需的所有配置信息。
 /// </summary>
-public record RegisterSensorData(
+public record RegisterSensorRequest(
     string Name,        // 必需: 传感器的名称
     object State,       // 必需: 传感器的初始状态
     string Type,        // 必需: 传感器的类型，必须是 "binary_sensor" 或 "sensor"

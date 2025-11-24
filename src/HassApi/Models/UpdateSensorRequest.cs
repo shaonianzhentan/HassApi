@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace HassApi.Models;
 
@@ -7,10 +6,9 @@ namespace HassApi.Models;
 /// Webhook 消息 'update_sensor_states' 数组中的单个传感器更新负载。
 /// 用于更新已注册传感器的当前状态。
 /// </summary>
-public record UpdateSensorData(
+public record UpdateSensorRequest(
     object State,       // 必需: 传感器的当前状态
     string Type,        // 必需: 传感器的类型，必须是 "binary_sensor" 或 "sensor"
-    [property: JsonPropertyName("unique_id")] 
     string UniqueId     // 必需: 传感器在此 App 安装中的唯一标识符
 )
 {

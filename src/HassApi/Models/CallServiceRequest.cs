@@ -6,7 +6,7 @@ namespace HassApi.Models;
 /// Webhook 消息的 'call_service' 类型中嵌套的 'data' 负载。
 /// 包含要调用的服务信息。
 /// </summary>
-public record CallServiceData(
+public record CallServiceRequest(
     string Domain, // 服务的领域 (如 light, switch)
     string Service // 服务动作名称 (如 turn_on, toggle)
 )
