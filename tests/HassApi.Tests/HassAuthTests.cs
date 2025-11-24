@@ -12,14 +12,25 @@ namespace HassApi.Tests;
 public class HassAuthTests
 {
 
-    private const string FakeBaseUrl = "http://192.168.0.100:8123";
+    private const string FakeBaseUrl = "http://localhost:8123";
     private const string FakeClientId = "AndroidTV";
 
     [Fact]
-    public async Task GetAccessTokenAsync()
+    public async Task Main()
     {
-        HassAuth hassAuth = new HassAuth(FakeBaseUrl, FakeClientId);
-        var result = hassAuth.GetAccessTokenAsync("");
-        Assert.NotNull(result);
+        var code = "";
+        Assert.NotEmpty(code);
+
+        var hassAuth = new HassAuth(FakeBaseUrl, FakeClientId);
+        var rt = hassAuth.GetRefreshTokenAsync(code);
+        Assert.NotNull(rt);
+
+        var refreshToken = rt.RefreshToken;
+        Assert.NotEmpty(refreshToken);
+        Assert.NotEmpty(rt.AccessToken);
+
+        var at = hassAuth.GetAccessTokenAsync(refreshToken);
+        Assert.NotNull(at);
+        Assert.NotEmpty(at.AccessToken);
     }
 }
