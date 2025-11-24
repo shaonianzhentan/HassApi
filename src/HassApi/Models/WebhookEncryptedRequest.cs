@@ -1,4 +1,4 @@
-namespace HassApi.Models.MobileApp;
+namespace HassApi.Models;
 
 /// <summary>
 /// Webhook 加密请求模型。

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace HassApi.Models.MobileApp;
+namespace HassApi.Models;
 
 /// <summary>
 /// Webhook 消息 'update_sensor_states' 数组中的单个传感器更新负载。

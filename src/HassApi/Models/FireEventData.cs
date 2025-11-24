@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace HassApi.Models.MobileApp;
+namespace HassApi.Models;
 
 /// <summary>
 /// Webhook 消息的 'fire_event' 类型中嵌套的 'data' 负载。

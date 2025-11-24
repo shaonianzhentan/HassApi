@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HassApi.Models.MobileApp;
+using HassApi.Models;
 
 namespace HassApi;
 
@@ -141,13 +141,13 @@ public class MobileApp
     /// 通过 Webhook 更新已注册设备的信息 (如 App 版本、设备名称或推送令牌)。
     /// </summary>
     public Task UpdateRegistrationAsync(
-        UpdateRegistrationData updateData,
+        UpdateRegistrationRequest updateData,
         CancellationToken cancellationToken = default)
     {
         // --- 兼容旧框架的参数检查 ---
         if (updateData is null) throw new ArgumentNullException(nameof(updateData));
 
-        var updatePayload = new WebhookRequest<UpdateRegistrationData>("update_registration", updateData);
+        var updatePayload = new WebhookRequest<UpdateRegistrationRequest>("update_registration", updateData);
         return SendWebhookDataAsync(updatePayload, cancellationToken);
     }
 
@@ -166,8 +166,8 @@ public class MobileApp
             throw new ArgumentException("Templates data cannot be null or empty.", nameof(templatesData));
         }
 
-        var renderData = new RenderTemplateRequestData { Templates = templatesData };
-        var renderPayload = new WebhookRequest<RenderTemplateRequestData>("render_template", renderData);
+        var renderData = new RenderTemplateRequest(templatesData);
+        var renderPayload = new WebhookRequest<RenderTemplateRequest>("render_template", renderData);
 
         return PostJsonUnauthenticatedWithResponseAsync<Dictionary<string, string>>(renderPayload, cancellationToken);
     }

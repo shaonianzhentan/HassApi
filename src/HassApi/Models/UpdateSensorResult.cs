@@ -1,4 +1,4 @@
-namespace HassApi.Models.MobileApp;
+namespace HassApi.Models;
 
 /// <summary>
 /// Webhook 消息 'update_sensor_states' 响应中单个传感器更新的结果。
