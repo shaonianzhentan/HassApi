@@ -1,61 +1,64 @@
 using HassApi.Models; 
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web;
+using System.Web; 
+using System.IO;
+using System;
 
 namespace HassApi;
 
 /// <summary>
 /// Home Assistant OAuth2 授权服务客户端。
 /// </summary>
-public class HassAuth 
+public class HassAuth: HttpClientBase 
 {
-    // 关键修改 1: 使用 static readonly 确保在整个应用程序中只创建一个 HttpClient 实例。
-    private static readonly HttpClient _httpClient = HassDefaults.UnauthenticatedClient;
-
-    readonly string baseUrl;
+    /// <summary>
+    /// 编码后的 client_id
+    /// </summary>
     readonly string clientId;
-    public readonly string redirectUri;
+
+    /// <summary>
+    /// 重定向URI，获取code码（示例：http://homeassistant.local:8123/?external_auth=1）
+    /// </summary>
+    public readonly string RedirectUri;
+    /// <summary>
+    /// 授权URI（示例：http://homeassistant.local:8123/auth/authorize?client_id={clientId}&redirect_uri={RedirectUri}）
+    /// </summary>
+    public readonly string AuthorizeUri;
 
     /// <summary>
     /// 初始化 HassAuth。
     /// </summary>
-    public HassAuth(string baseUrl, string clientId)
+    public HassAuth(string baseUrl, string clientId): base(baseUrl)
     {
-        this.baseUrl = baseUrl.TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(clientId)) throw new ArgumentNullException(nameof(clientId));
+
+        // 使用继承的 baseUrl 字段进行 URL 拼接
         this.clientId = HttpUtility.UrlEncode(clientId);
-        redirectUri = $"{baseUrl}/?external_auth=1";
+        RedirectUri = $"{this.baseUrl}/?external_auth=1"; 
+        AuthorizeUri = $"{this.baseUrl}/auth/authorize?client_id={clientId}&redirect_uri={HttpUtility.UrlEncode(RedirectUri)}";
     }
 
     /// <summary>
-    /// 获取授权链接
-    /// </summary>
-    /// <returns></returns>
-    public string GetAuthUrl()
-    {
-        return $"{baseUrl}/auth/authorize?client_id={clientId}&redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
-    }
-
-    /// <summary>
-    /// 内部通用方法，用于向 /auth/token 端点发送 POST 请求。
+    /// 内部通用方法，用于向 /auth/token 端点发送 POST 请求 (Content-Type: application/x-www-form-urlencoded)。
     /// </summary>
     private async Task<AuthorizationResult?> PostAuthTokenAsync(string queryString)
     {
-        // 1. 使用静态的 _httpClient
+        // 创建 Content，指定 Content-Type 为 form-urlencoded
         using var httpContent = new StringContent(queryString, Encoding.UTF8, "application/x-www-form-urlencoded");
         
-        string fullUrl = $"{baseUrl}/auth/token";
-        
-        // 2. 使用静态客户端发送请求
-        HttpResponseMessage response = await _httpClient.PostAsync(fullUrl, httpContent);
+        // 直接使用相对路径字符串，利用 RawClient 的 BaseAddress
+        HttpResponseMessage response = await RawClient.PostAsync("auth/token", httpContent);
 
         response.EnsureSuccessStatusCode(); 
 
         string responseContent = await response.Content.ReadAsStringAsync();
         
-        return HassJsonHelper.Deserialize<AuthorizationResult>(responseContent);
+        // 反序列化：将 string 转换为 Stream 以兼容 HassJsonHelper.DeserializeAsync<T>(Stream)
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(responseContent));
+        
+        return await HassJsonHelper.DeserializeAsync<AuthorizationResult>(stream);
     }
     
     // --- 公共授权接口 (保持不变) ---

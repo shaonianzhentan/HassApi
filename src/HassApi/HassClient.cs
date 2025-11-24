@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,30 +11,20 @@ namespace HassApi;
 /// <summary>
 /// Home Assistant REST API 客户端
 /// </summary>
-public class HassClient
+public class HassClient: HttpClientBase
 {
-    private readonly string _initialBaseUrl;
-    private readonly HttpClient _httpClient = new HttpClient();
-
     /// <summary>
     /// 初始化 HassClient
     /// </summary>
     /// <param name="baseUrl">HA 地址 (例如: http://192.168.1.5:8123)</param>
     /// <param name="accessToken">长期访问令牌 (Long-Lived Access Token)</param>
-    public HassClient(string baseUrl, string accessToken)
+    public HassClient(string baseUrl, string accessToken): base(baseUrl)
     {
         // 基础校验
-        if (string.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentNullException(nameof(baseUrl));
         if (string.IsNullOrWhiteSpace(accessToken)) throw new ArgumentNullException(nameof(accessToken));
 
-        // 配置 BaseAddress
-        _initialBaseUrl = baseUrl.TrimEnd('/') + "/";
-        _httpClient.BaseAddress = new Uri(_initialBaseUrl);
-
         // 配置默认请求头
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+        this.SetAuthorizationToken(accessToken);
     }
 
     // --- 核心状态 API ---
@@ -310,81 +298,5 @@ public class HassClient
     {
         // 此 API 不需要 Payload，但需要发送 POST 请求
         return await PostJsonAsync<ConfigCheckResponse>("api/config/core/check_config", payload: null, cancellationToken);
-    }
-
-    // --- 私有辅助方法 ---
-
-    /// <summary>
-    /// 执行 GET 请求并反序列化 JSON 响应到指定类型 T。
-    /// </summary>
-    private async Task<T?> GetJsonAsync<T>(string endpoint, CancellationToken cancellationToken)
-    {
-        var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return default;
-            }
-
-            var errorMsg = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"API Error GET {endpoint}: {response.StatusCode} - {errorMsg}");
-        }
-
-        using var stream = await response.Content.ReadAsStreamAsync();
-        return await HassJsonHelper.DeserializeAsync<T>(stream, cancellationToken);
-    }
-
-    /// <summary>
-    /// 执行 POST 请求，发送 JSON Payload，并反序列化 JSON 响应到指定类型 T。
-    /// </summary>
-    private async Task<T?> PostJsonAsync<T>(string endpoint, object? payload, CancellationToken cancellationToken)
-    {
-        var jsonContent = payload is not null
-            ? HassJsonHelper.Serialize(payload)
-            : "{}"; // 如果 payload 为 null，发送空 JSON 对象
-
-        using var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-        var response = await _httpClient.PostAsync(endpoint, httpContent, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorMsg = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"API Error POST {endpoint}: {response.StatusCode} - {errorMsg}");
-        }
-
-        // 某些 POST 请求返回空内容 (e.g., 204 No Content)，此时返回 default
-        if (response.Content.Headers.ContentLength == 0)
-        {
-            return default;
-        }
-
-        using var responseStream = await response.Content.ReadAsStreamAsync();
-        return await HassJsonHelper.DeserializeAsync<T>(responseStream, cancellationToken);
-    }
-
-    /// <summary>
-    /// 执行 POST 请求，发送 JSON Payload，并返回原始字符串响应。
-    /// 用于 /api/template 等接口。
-    /// </summary>
-    private async Task<string> PostRawAsync(string endpoint, object? payload, CancellationToken cancellationToken)
-    {
-        var jsonContent = payload is not null
-            ? HassJsonHelper.Serialize(payload)
-            : "{}";
-
-        using var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-        var response = await _httpClient.PostAsync(endpoint, httpContent, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorMsg = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"API Error POST {endpoint}: {response.StatusCode} - {errorMsg}");
-        }
-
-        return await response.Content.ReadAsStringAsync();
     }
 }
