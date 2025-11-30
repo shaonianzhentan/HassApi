@@ -9,13 +9,20 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageId>HassApi</PackageId>
-    <Version>1.0.6</Version>
+    <Version>0.0.1</Version>
     <Authors>shaonianzhentan</Authors>
     <Company>shaonianzhentan</Company>
+	  <Copyright>© 2025 shaonianzhentan</Copyright>
     <Description>A comprehensive .NET Standard 2.0 library for Home Assistant REST API.</Description>
     <PackageTags>homeassistant;iot;smarthome;api;client</PackageTags>
+	  <PackageReleaseNotes>
+		  Support basic functions
+	  </PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/shaonianzhentan/HassApi</RepositoryUrl>
+
+	<PackageProjectUrl>https://github.com/shaonianzhentan/HassApi</PackageProjectUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <RepositoryUrl>https://github.com/shaonianzhentan/HassApi</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
